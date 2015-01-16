@@ -4,7 +4,7 @@
 Library for bitcoin base58 encoding decoding based on the bitcoin base58 implementation:
 https://github.com/bitcoin/bitcoin/blob/master/src/base58.cpp
 '''
-
+import hashlib
 
 _pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
@@ -44,13 +44,29 @@ def decodeBase58(psz):
     for _ in range(zeroes):
         b256.insert(0,0)
     
-    return b256
+    binarystring = b''.join([chr(byte) for byte in b256])
+    return binarystring
 
-def hexEncodeByteList(b256):
-    return ''.join(''.join('{:02x}'.format(x) for x in b256))
+
+'''
+Decode a base58-encoded string (psz) that includes a checksum into a byte list.
+Also returns a boolean with the checksum match
+psz cannot be None.
+'''
+def decodeBase58Check(psz):
+    ret = decodeBase58(psz)
+    if len(ret) < 4:
+        return ret, False
+    #re-calculate the checksum, ensure it matches the included 4-byte checksum
+    hash = hashlib.sha256(hashlib.sha256(ret[:-4]).digest()).digest()
+    hashmatch = hash[:4] == ret[-4:]
+    return ret, hashmatch
+
 
 if __name__ == '__main__':
     address = ' 1DTjvhLV6S72NQrSDrCX1GTCb9B3D5pmCB '
-    decoded = hexEncodeByteList(decodeBase58(address))
-    print decoded
-    assert '0088b028348642ad1bbaa8fcc054273070eda045fe238fa750' == decoded
+    import binascii
+    decoded, hashmatch = decodeBase58Check(address)
+    assert '0088b028348642ad1bbaa8fcc054273070eda045fe238fa750' == binascii.hexlify(decoded)
+    assert hashmatch
+    

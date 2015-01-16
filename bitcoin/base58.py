@@ -9,7 +9,7 @@ import hashlib
 _pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 '''
-Decode a base58-encoded string (psz) into a byte list.
+Decode a base58-encoded string (psz).
 psz cannot be None.
 '''
 def decodeBase58(psz):
@@ -23,7 +23,7 @@ def decodeBase58(psz):
             break
         zeroes += 1
     
-    #bytearray base256
+    #byte list base256
     b256 = []
     # Process the characters.
     for psz_char in psz[zeroes:]:
@@ -47,6 +47,40 @@ def decodeBase58(psz):
     binarystring = b''.join([chr(byte) for byte in b256])
     return binarystring
 
+'''
+Encode a byte array as a base58-encoded string
+'''
+def encodeBase58(binarray):
+    # Count leading zeroes.
+    zeroes = 0
+    for byte in binarray:
+        if ord(byte) != 0:
+            break
+        zeroes += 1
+    
+    #byte list base58
+    b58 = []
+    # Process the bytes.
+    for byte in binarray[zeroes:]:
+        carry = ord(byte)
+        # Apply "b58 = b58 * 256 + byte".
+        for it in reversed(range(len(b58))):
+            carry += (b58[it] * 256)
+            b58[it] = carry % 58;
+            carry /= 58;
+        while carry != 0:
+            b58.insert(0, carry % 58)
+            carry /= 58;
+    
+    #Add leading zeroes
+    for _ in range(zeroes):
+        b58.insert(0,0)
+    
+    result = ''.join([_pszBase58[it] for it in b58])
+    return result
+
+
+
 
 '''
 Decode a base58-encoded string (psz) that includes a checksum into a byte list.
@@ -69,4 +103,6 @@ if __name__ == '__main__':
     decoded, hashmatch = decodeBase58Check(address)
     assert '0088b028348642ad1bbaa8fcc054273070eda045fe238fa750' == binascii.hexlify(decoded)
     assert hashmatch
+    encoded = encodeBase58(decoded)
+    assert address.strip() == encoded
     

@@ -79,11 +79,8 @@ def encodeBase58(binarray):
     result = ''.join([_pszBase58[it] for it in b58])
     return result
 
-
-
-
 '''
-Decode a base58-encoded string (psz) that includes a checksum into a byte list.
+Decode a base58-encoded string (psz) that includes a checksum into a byte array.
 Also returns a boolean with the checksum match
 psz cannot be None.
 '''
@@ -96,13 +93,23 @@ def decodeBase58Check(psz):
     hashmatch = hash[:4] == ret[-4:]
     return ret, hashmatch
 
+'''
+Encode a byte array as a base58-encoded string, including checksum
+'''
+def encodeBase58Check(binarray):
+    # add 4-byte hash check to the end
+    hash = hashlib.sha256(hashlib.sha256(binarray).digest()).digest()
+    return encodeBase58(binarray + hash[:4])
+
+
 
 if __name__ == '__main__':
-    address = ' 1DTjvhLV6S72NQrSDrCX1GTCb9B3D5pmCB '
+    test_address = ' 1DTjvhLV6S72NQrSDrCX1GTCb9B3D5pmCB '
     import binascii
-    decoded, hashmatch = decodeBase58Check(address)
+    decoded, hashmatch = decodeBase58Check(test_address)
     assert '0088b028348642ad1bbaa8fcc054273070eda045fe238fa750' == binascii.hexlify(decoded)
     assert hashmatch
-    encoded = encodeBase58(decoded)
-    assert address.strip() == encoded
+    
+    encoded = encodeBase58Check(binascii.unhexlify('0088b028348642ad1bbaa8fcc054273070eda045fe'))
+    assert test_address.strip() == encoded
     

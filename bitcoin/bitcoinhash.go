@@ -21,7 +21,7 @@ func Hash160(b []byte) [20]byte {
 
 	var ripemd160hash [20]byte
 	ripemd160hasher.Write(sha256hash[:])
-	copy(ripemd160hash[:], ripemd160hasher.Sum([]byte{}))
+	copy(ripemd160hash[:], ripemd160hasher.Sum(nil))
 
 	return ripemd160hash
 }

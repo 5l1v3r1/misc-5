@@ -7,16 +7,16 @@ import (
 
 func TestDecodeBase58(t *testing.T) {
 	address := " 1DTjvhLV6S72NQrSDrCX1GTCb9B3D5pmCB "
-	expected := "0088b028348642ad1bbaa8fcc054273070eda045fe"
+	expected := "88b028348642ad1bbaa8fcc054273070eda045fe"
 
-	result, match := DecodeBase58Check(address)
+	result, version, match := DecodeBase58Check(address)
 	if !match {
 		t.Error("Invalid checksum matching")
 	}
 
 	hexEncodedResult := hex.EncodeToString(result)
 
-	if expected != hexEncodedResult {
+	if expected != hexEncodedResult || version != 0 {
 		t.Errorf("Decoded address is %s instead of %s", hexEncodedResult, expected)
 	}
 
@@ -24,10 +24,10 @@ func TestDecodeBase58(t *testing.T) {
 
 func TestEncodeBase58Check(t *testing.T) {
 
-	data, _ := hex.DecodeString("0088b028348642ad1bbaa8fcc054273070eda045fe")
+	data, _ := hex.DecodeString("88b028348642ad1bbaa8fcc054273070eda045fe")
 	address := "1DTjvhLV6S72NQrSDrCX1GTCb9B3D5pmCB"
 
-	encoded := EncodeBase58Check(data)
+	encoded := EncodeBase58Check(data, 0)
 	if encoded != address {
 		t.Errorf("Encoded address is %s instead of %s", encoded, address)
 	}

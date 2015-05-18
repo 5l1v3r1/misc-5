@@ -92,12 +92,12 @@ func compare(a, b []byte) bool {
 }
 
 //DecodeBase58Check decodes a base58-encoded string (psz) that includes a checksum (last 4 bytes) into a byte slice
-// Also returns a boolean with the checksum match
-func DecodeBase58Check(psz string) (decodedData []byte, checksummatch bool) {
+// Also returns the version identifier and a boolean indicating if the checksum matched
+func DecodeBase58Check(psz string) (decodedData []byte, version byte, checksummatch bool) {
 	const checksumlength = 4
 	decoded := DecodeBase58(psz)
 	if len(decoded) < checksumlength {
-		return decoded, false
+		return decoded, 0, false
 	}
 
 	//Extract the checksum (last 4 bytes)
@@ -108,14 +108,22 @@ func DecodeBase58Check(psz string) (decodedData []byte, checksummatch bool) {
 	hash := Hash256(decodedData)
 	checksummatch = compare(hash[:checksumlength], checksum)
 
+	//First byte is the version
+	version = decoded[0]
+	decodedData = decodedData[1:]
+
 	return
 }
 
 //EncodeBase58Check encodes a byte array as a base58-encoded string, including checksum
-func EncodeBase58Check(binarray []byte) string {
-	//add 4-byte hash check to the end
-	checksum := Hash256(binarray)
+func EncodeBase58Check(binarray []byte, version byte) string {
+	dataWithVersion := make([]byte, 1, len(binarray)+1+4)
+	dataWithVersion[0] = version
+	dataWithVersion = append(dataWithVersion, binarray...)
 
-	dataWithChecksum := append(binarray, checksum[:4]...)
-	return EncodeBase58(dataWithChecksum)
+	//add 4-byte hash check to the end
+	checksum := Hash256(dataWithVersion)
+
+	dataWithVersionAndChecksum := append(dataWithVersion, checksum[:4]...)
+	return EncodeBase58(dataWithVersionAndChecksum)
 }

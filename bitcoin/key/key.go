@@ -28,16 +28,11 @@ type PublicKey struct {
 	y *big.Int
 }
 
-//Marshal converts a public key into the form specified in section 4.3.6 of ANSI X9.62.
-func (pub *PublicKey) marshal() []byte {
-	return secp256k1.Marshal(pub.x, pub.y)
-}
-
 //Encode creates a Base58Check representation of a public key
 func (pub *PublicKey) Encode() string {
 	const version byte = 0x0
 
-	marshalled := pub.marshal()
+	marshalled := secp256k1.Marshal(pub.x, pub.y)
 	hashed := bitcoin.Hash160(marshalled)
 	return bitcoin.EncodeBase58Check(hashed[:], version)
 }

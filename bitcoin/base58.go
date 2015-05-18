@@ -13,7 +13,7 @@ import (
 const pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
 //DecodeBase58 decodes a base58-encoded string (psz).
-func DecodeBase58(psz string) []byte {
+func DecodeBase58(psz string) (result []byte) {
 	//Strip leading and trailing spaces
 	psz = strings.TrimSpace(psz)
 
@@ -41,10 +41,10 @@ func DecodeBase58(psz string) []byte {
 
 	// //Add leading zeroes
 	encoded := b256.Bytes()
-	result := make([]byte, zeroes+len(encoded))
+	result = make([]byte, zeroes+len(encoded))
 	copy(result[zeroes:], encoded)
 
-	return result
+	return
 }
 
 //EncodeBase58 encodes a byte slice a base58-encoded string
@@ -93,7 +93,7 @@ func compare(a, b []byte) bool {
 
 //DecodeBase58Check decodes a base58-encoded string (psz) that includes a checksum (last 4 bytes) into a byte slice
 // Also returns a boolean with the checksum match
-func DecodeBase58Check(psz string) ([]byte, bool) {
+func DecodeBase58Check(psz string) (decodedData []byte, checksummatch bool) {
 	const checksumlength = 4
 	decoded := DecodeBase58(psz)
 	if len(decoded) < checksumlength {
@@ -101,14 +101,14 @@ func DecodeBase58Check(psz string) ([]byte, bool) {
 	}
 
 	//Extract the checksum (last 4 bytes)
-	decodedData := decoded[:len(decoded)-checksumlength]
+	decodedData = decoded[:len(decoded)-checksumlength]
 	checksum := decoded[len(decodedData):]
 
 	//re-calculate the checksum, ensure it matches the included 4-byte checksum
 	hash := Hash256(decodedData)
-	hashmatch := compare(hash[:checksumlength], checksum)
+	checksummatch = compare(hash[:checksumlength], checksum)
 
-	return decodedData, hashmatch
+	return
 }
 
 //EncodeBase58Check encodes a byte array as a base58-encoded string, including checksum

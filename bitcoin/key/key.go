@@ -4,10 +4,15 @@ import (
 	"crypto/rand"
 	"math/big"
 
+	"encoding/hex"
+
 	"github.com/titanous/bitcoin-crypto/bitelliptic"
 
 	"github.com/robvanmieghem/misc/bitcoin"
 )
+
+//WIFEncoding is the version code for WIF encoded private keys
+const WIFEncoding byte = 128
 
 var secp256k1 = bitelliptic.S256()
 
@@ -20,6 +25,24 @@ type PrivateKey struct {
 func (priv *PrivateKey) ToPublicKey() (pub PublicKey) {
 	pub.x, pub.y = secp256k1.ScalarBaseMult(priv.secret)
 	return
+}
+
+//EncodeToHex serializes to hexadecimal representation
+func (priv *PrivateKey) EncodeToHex() (encoded string) {
+	encoded = hex.EncodeToString(priv.secret)
+	return
+}
+
+//EncodeToWIF serializes to Wallet Import Format
+func (priv *PrivateKey) EncodeToWIF() (encoded string) {
+	return bitcoin.EncodeBase58Check(priv.secret, WIFEncoding)
+}
+
+//EncodeToWIFCompressed serializes to compressed Wallet Import Format
+func (priv *PrivateKey) EncodeToWIFCompressed() (encoded string) {
+	const compressionFlag byte = 1
+	secretWithCompressionFlag := append(priv.secret, compressionFlag)
+	return bitcoin.EncodeBase58Check(secretWithCompressionFlag, WIFEncoding)
 }
 
 //PublicKey of a secp256k1 keypair

@@ -58,7 +58,7 @@ func EncodeBase58(binarray []byte) string {
 	mod := new(big.Int)
 	zero := big.NewInt(0)
 
-	//Build up bqse58 in reverse order
+	//Build up base58 in reverse order
 	for base256.Cmp(zero) > 0 {
 		base256.DivMod(base256, radix, mod)
 		encoded = append(encoded, pszBase58[mod.Int64()])
@@ -66,7 +66,7 @@ func EncodeBase58(binarray []byte) string {
 
 	//Add leading zeroes
 	zerochar := pszBase58[0]
-	for value := range binarray {
+	for _, value := range binarray {
 		if value != 0 {
 			break
 		}

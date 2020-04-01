@@ -1,0 +1,24 @@
+FROM ubuntu:19.10
+
+LABEL maintainer="Rob Van Mieghem<Github: @robvanmieghem>"
+
+RUN apt update
+RUN apt -y install curl
+RUN cd /tmp
+RUN curl -LO https://github.com/stellar/kelp/releases/download/v1.8.1/kelp-v1.8.1-linux-amd64.tar
+RUN tar -x -f kelp-v1.8.1-linux-amd64.tar
+RUN mv kelp-v1.8.1/kelp /bin
+RUN rm -rf kelp-v1.8.1
+RUN rm -f kelp-v1.8.1-linux-amd64.tar
+WORKDIR /bin
+
+# set ulimit
+RUN ulimit -n 10000
+
+ENTRYPOINT ["/bin/kelp"]
+CMD ["trade","-c", "/ops/trader.cfg",  "--strategy", "sell",  "-f", "/ops/sell.cfg"]
+# sample command to run this container as a daemon process:
+# docker run -v `pwd`/ops:/ops -d kelp
+# this assumes that you are running ccxt on port 3000 outside this kelp docker container
+# the three port numbers (8011 in the example above) must be the same and must be specified
+# the first part of the -v argument is the directory where you want to save the kelp configs and kelp logs from the bots created in this container
